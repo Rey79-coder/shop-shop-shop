@@ -4,21 +4,30 @@ import { useQuery } from '@apollo/client';
 
 import { QUERY_PRODUCTS } from '../utils/queries';
 import spinner from '../assets/spinner.gif';
+import { useStoreContext } from "../utils/GlobalState";
+import { UPDATE_PRODUCTS } from "../utils/actions";
 
 function Detail() {
-  const { id } = useParams();
 
-  const [currentProduct, setCurrentProduct] = useState({});
+const [state, dispatch] = useStoreContext();
+const { id } = useParams();
 
-  const { loading, data } = useQuery(QUERY_PRODUCTS);
+const [currentProduct, setCurrentProduct] = useState({})
 
-  const products = data?.products || [];
+const { loading, data } = useQuery(QUERY_PRODUCTS);
 
-  useEffect(() => {
-    if (products.length) {
-      setCurrentProduct(products.find((product) => product._id === id));
-    }
-  }, [products, id]);
+const { products } = state;
+
+useEffect(() => {
+  if (products.length) {
+    setCurrentProduct(products.find(product => product._id === id));
+  } else if (data) {
+    dispatch({
+      type: UPDATE_PRODUCTS,
+      products: data.products
+    });
+  }
+}, [products, data, dispatch, id]);
 
   return (
     <>
